@@ -27,9 +27,16 @@ except URLError, e:
 		else:
 				sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
 
-soup = BeautifulSoup(response)
-
 # Generate list of pastes
+soup = BeautifulSoup(response)
+tabledata = soup.find_all('td')
+pastes = []
+for td in tabledata:
+	try:	
+		if td.a['href'].count("/archive/text") == 0:
+				pastes.append(td.a['href'])
+    except:
+		pass
 
 # Iterate through each listed paste
 # if we don't already have this one, store it
