@@ -18,25 +18,31 @@ testurl = "http;//pastebin.com/archive"
 
 req = urllib2.Request(testurl)
 try:
-		response = urllib2.urlopen(req)
+    response = urllib2.urlopen(req)
 except URLError, e:
-		if hasattr(e,'reason'):
-				sys.stderr.write('urlopen() returned error '+e.reason+'\n')
-		elif hasattr(e,'code'):
-				sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
-		else:
-				sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
+    if hasattr(e,'reason'):
+        sys.stderr.write('urlopen() returned error '+e.reason+'\n')
+    elif hasattr(e,'code'):
+        sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
+    else:
+        sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
 
 # Generate list of pastes
 soup = BeautifulSoup(response)
 tabledata = soup.find_all('td')
 pastes = []
 for td in tabledata:
-	try:	
-		if td.a['href'].count("/archive/text") == 0:
-				pastes.append(td.a['href'])
+    try:    
+        if td.a['href'].count("/archive/text") == 0:
+                pastes.append(td.a['href'])
     except:
-		pass
+        pass
 
 # Iterate through each listed paste
 # if we don't already have this one, store it
+for paste in pastes:
+    try:
+        open('data'+paste)
+    except:
+        # drop the leading "/"
+        pastereq = 'http://pastebin.com/raw.php?i='+paste[1::]
