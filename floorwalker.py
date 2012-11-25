@@ -11,12 +11,13 @@ import urllib2
 
 # Planning through commenting!
 
-# instantiated thru cron so check for a lock first
+# TODO: instantiated thru cron so check for a lock first
 
 # assuming nothing else is running, get http://pastebin.com/archive
-testurl = "http;//pastebin.com/archive"
+testurl = "http://pastebin.com/archive"
 
 req = urllib2.Request(testurl)
+# TODO: factor out these urlopens and error checking
 try:
     response = urllib2.urlopen(req)
 except URLError, e:
@@ -33,7 +34,7 @@ tabledata = soup.find_all('td')
 pastes = []
 for td in tabledata:
     try:    
-        if td.a['href'].count("/archive/text") == 0:
+        if td.a['href'].count("/archive/") == 0:
                 pastes.append(td.a['href'])
     except:
         pass
@@ -41,8 +42,31 @@ for td in tabledata:
 # Iterate through each listed paste
 # if we don't already have this one, store it
 for paste in pastes:
+    # drop the leading "/"
+    paste = paste[1::]
+    havepaste = True
     try:
-        open('data'+paste)
+        open('data/'+paste)
     except:
-        # drop the leading "/"
-        pastereq = 'http://pastebin.com/raw.php?i='+paste[1::]
+    	havepaste = False
+
+    # nested try blocks feel bad, man
+    if not havepaste:
+        pasteurl = 'http://pastebin.com/raw.php?i='+paste
+    	pastereq = urllib2.Request(pasteurl)
+    	try:
+    	    pasteresp = urllib2.urlopen(pastereq)
+    	except URLError, e:
+    	    if hasattr(e,'reason'):
+    			sys.stderr.write('urlopen() returned error '+e.reason+'\n')
+    	    elif hasattr(e,'code'):
+    			sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
+    	    else:
+    			sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
+    	try:
+    		pastefile=open('data/'+paste,'w')
+    		pastefile.write(pasteresp.read())
+    		pastefile.close()
+    	except:
+    		sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
+ 
