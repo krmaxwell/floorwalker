@@ -41,6 +41,12 @@ while True:
 
     # Generate list of pastes
     soup = BeautifulSoup(response)
+
+    # Be nice if we're going too fast
+    if soup.get_text().find('Please slow down'):
+        sleep(10)
+        break
+
     tabledata = soup.find_all('td')
     # TODO: pastes should be persistent across runs so we don't have to grab it every time
     pastes = []
@@ -54,31 +60,34 @@ while True:
 
     # Iterate through each listed paste
     # if we don't already have this one, store it
-    for paste in pastes:
+    for pasteID in pastes:
         # drop the leading "/"
-        pastematch = pastere.match(paste[1::])
+        pastematch = pastere.match(pasteID[1::])
         if pastematch:
             havepaste = True
             try:
-                open('data/'+paste)
+                open('data/'+pasteID)
                 logging.info('Found paste %s in data', pastematch.group())
             except:
                 havepaste = False
         else:
             havepaste = True
-            logging.info('Paste %s doesn\'t match the pattern', paste)
+            logging.info('Paste %s doesn\'t match the pattern', pasteID)
 
         # nested try blocks feel bad, man
         if not havepaste:
             time.sleep(2)
-            pasteurl = 'http://pastebin.com/raw.php?i='+paste
-            logging.info('Getting paste %s', paste)
+            pasteurl = 'http://pastebin.com/raw.php?i='+pasteID
+            logging.info('Getting paste %s', pasteID)
             pasteresp = geturl(pasteurl)
+            paste = pasteresp.read()
+            if paste.find('Please slow down'):
+                sleep(10)
             try:
             # TODO: replace with sqlite3
-                pastefile=open('data/'+paste,'w')
-                pastefile.write(pasteresp.read())
+                pastefile=open('data/'+pasteID,'w')
+                pastefile.write(paste)
                 pastefile.close()
             except:
-                logging.error('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
+                logging.error('ERMAGERD couldn\'t write to file: data/'+pasteID+'\n')
     time.sleep(60)
