@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 import sys
 import urllib2
+import time
 
 # Planning through commenting!
 
@@ -29,40 +30,42 @@ def geturl(myurl):
 
 # assuming nothing else is running, get http://pastebin.com/archive
 testurl = "http://pastebin.com/archive"
-response = geturl(testurl)
+while True:
+    response = geturl(testurl)
 
-# Generate list of pastes
-soup = BeautifulSoup(response)
-tabledata = soup.find_all('td')
-pastes = []
-for td in tabledata:
-    try:    
-        if td.a['href'].count("/archive/") == 0:
-		# TODO: use regex 
+    # Generate list of pastes
+    soup = BeautifulSoup(response)
+    tabledata = soup.find_all('td')
+    pastes = []
+    for td in tabledata:
+        try:    
+            if td.a['href'].count("/archive/") == 0:
+            # TODO: use regex 
                 pastes.append(td.a['href'])
-    except:
-        pass
+        except:
+            pass
 
-# Iterate through each listed paste
-# if we don't already have this one, store it
-for paste in pastes:
-    # drop the leading "/"
-    paste = paste[1::]
-    havepaste = True
-    try:
-        open('data/'+paste)
-    except:
-    	havepaste = False
+    # Iterate through each listed paste
+    # if we don't already have this one, store it
+    for paste in pastes:
+        # drop the leading "/"
+        paste = paste[1::]
+        havepaste = True
+        try:
+            open('data/'+paste)
+        except:
+            havepaste = False
 
-    # nested try blocks feel bad, man
-    if not havepaste:
-        pasteurl = 'http://pastebin.com/raw.php?i='+paste
-    	pasteresp = geturl(pasteurl)
-    	try:
-		# TODO: replace with sqlite3
-    		pastefile=open('data/'+paste,'w')
-    		pastefile.write(pasteresp.read())
-    		pastefile.close()
-    	except:
-    		sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
- 
+        # nested try blocks feel bad, man
+        if not havepaste:
+            time.sleep(2)
+            pasteurl = 'http://pastebin.com/raw.php?i='+paste
+            pasteresp = geturl(pasteurl)
+            try:
+            # TODO: replace with sqlite3
+                pastefile=open('data/'+paste,'w')
+                pastefile.write(pasteresp.read())
+                pastefile.close()
+            except:
+                sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
+    time.sleep(60)
