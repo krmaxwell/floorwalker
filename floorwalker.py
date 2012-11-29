@@ -31,8 +31,7 @@ def geturl(myurl):
 
 logging.basicConfig(filename='floorwalker.log',format='%(asctime)s %(message)s',datefmt='%Y-%m-%d %H%M.%S',level=logging.DEBUG)
 testurl = "http://pastebin.com/archive"
-# TODO: use for checking that we're getting a good paste
-#pastere = re.compile("\w")
+pastere = re.compile("\w")
 
 # Just keep running until somebody tells us to stop
 while True:
@@ -57,13 +56,17 @@ while True:
     # if we don't already have this one, store it
     for paste in pastes:
         # drop the leading "/"
-        paste = paste[1::]
-        havepaste = True
-        try:
-            open('data/'+paste)
-            logging.info('Found paste %s in data', paste)
-        except:
-            havepaste = False
+        pastematch = pastere.match(paste[1::])
+        if pastematch:
+            havepaste = True
+            try:
+                open('data/'+paste)
+                logging.info('Found paste %s in data', pastematch.group())
+            except:
+                havepaste = False
+        else:
+            havepaste = True
+            logging.info('Paste %s doesn\'t match the pattern', paste)
 
         # nested try blocks feel bad, man
         if not havepaste:
