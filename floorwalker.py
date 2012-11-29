@@ -8,65 +8,67 @@ from bs4 import BeautifulSoup
 
 import sys
 import urllib2
+import time
 
 # Planning through commenting!
 
-# TODO: instantiated thru cron so check for a lock first
+def geturl(myurl):
+    req = urllib2.Request(myurl)
+    # TODO: use proper loggging, not just stderr
+    try:
+        response = urllib2.urlopen(req)
+    except URLError, e:
+        if hasattr(e,'reason'):
+            sys.stderr.write('urlopen() returned error '+e.reason+'\n')
+        elif hasattr(e,'code'):
+            sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
+        else:
+            sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
+    return response
+    
+# TODO: check for a lock first
 
-# assuming nothing else is running, get http://pastebin.com/archive
 testurl = "http://pastebin.com/archive"
 
-req = urllib2.Request(testurl)
-# TODO: factor out these urlopens and error checking
-try:
-    response = urllib2.urlopen(req)
-except URLError, e:
-    if hasattr(e,'reason'):
-        sys.stderr.write('urlopen() returned error '+e.reason+'\n')
-    elif hasattr(e,'code'):
-        sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
-    else:
-        sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
+# Just keep running until somebody tells us to stop
+while True:
+    # TODO: handle KeyboardError and kill commands
+    response = geturl(testurl)
 
-# Generate list of pastes
-soup = BeautifulSoup(response)
-tabledata = soup.find_all('td')
-pastes = []
-for td in tabledata:
-    try:    
-        if td.a['href'].count("/archive/") == 0:
+    # Generate list of pastes
+    soup = BeautifulSoup(response)
+    tabledata = soup.find_all('td')
+    # TODO: pastes should be persistent across runs so we don't have to grab it every time
+    pastes = []
+    for td in tabledata:
+        try:    
+            if td.a['href'].count("/archive/") == 0:
+            # TODO: use regex 
                 pastes.append(td.a['href'])
-    except:
-        pass
+        except:
+            pass
 
-# Iterate through each listed paste
-# if we don't already have this one, store it
-for paste in pastes:
-    # drop the leading "/"
-    paste = paste[1::]
-    havepaste = True
-    try:
-        open('data/'+paste)
-    except:
-    	havepaste = False
+    # Iterate through each listed paste
+    # if we don't already have this one, store it
+    for paste in pastes:
+        # drop the leading "/"
+        paste = paste[1::]
+        havepaste = True
+        try:
+            open('data/'+paste)
+        except:
+            havepaste = False
 
-    # nested try blocks feel bad, man
-    if not havepaste:
-        pasteurl = 'http://pastebin.com/raw.php?i='+paste
-    	pastereq = urllib2.Request(pasteurl)
-    	try:
-    	    pasteresp = urllib2.urlopen(pastereq)
-    	except URLError, e:
-    	    if hasattr(e,'reason'):
-    			sys.stderr.write('urlopen() returned error '+e.reason+'\n')
-    	    elif hasattr(e,'code'):
-    			sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
-    	    else:
-    			sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
-    	try:
-    		pastefile=open('data/'+paste,'w')
-    		pastefile.write(pasteresp.read())
-    		pastefile.close()
-    	except:
-    		sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
- 
+        # nested try blocks feel bad, man
+        if not havepaste:
+            time.sleep(2)
+            pasteurl = 'http://pastebin.com/raw.php?i='+paste
+            pasteresp = geturl(pasteurl)
+            try:
+            # TODO: replace with sqlite3
+                pastefile=open('data/'+paste,'w')
+                pastefile.write(pasteresp.read())
+                pastefile.close()
+            except:
+                sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
+    time.sleep(60)
