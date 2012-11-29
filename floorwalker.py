@@ -9,30 +9,35 @@ from bs4 import BeautifulSoup
 import sys
 import urllib2
 import time
+import re
+import logging
 
 # Planning through commenting!
 
 def geturl(myurl):
     req = urllib2.Request(myurl)
-    # TODO: use proper loggging, not just stderr
     try:
         response = urllib2.urlopen(req)
     except URLError, e:
         if hasattr(e,'reason'):
-            sys.stderr.write('urlopen() returned error '+e.reason+'\n')
+            logging.warning('urlopen() returned error '+e.reason+'\n')
         elif hasattr(e,'code'):
-            sys.stderr.write('Server couldn\'t fulfill request: '+e.code+'\n')
+            logging.warning('Server couldn\'t fulfill request: '+e.code+'\n')
         else:
-            sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
+            logging.warning('Opened '+testurl+' with response code '+response.getcode()+'\n')
     return response
     
 # TODO: check for a lock first
 
+logging.basicConfig(filename='floorwalker.log',format='%(asctime)s %(message)s',datefmt='%Y-%m-%d %H%M.%S',level=logging.DEBUG)
 testurl = "http://pastebin.com/archive"
+# TODO: use for checking that we're getting a good paste
+#pastere = re.compile("\w")
 
 # Just keep running until somebody tells us to stop
 while True:
     # TODO: handle KeyboardError and kill commands
+    logging.info('Getting URL %s', testurl)
     response = geturl(testurl)
 
     # Generate list of pastes
@@ -43,7 +48,7 @@ while True:
     for td in tabledata:
         try:    
             if td.a['href'].count("/archive/") == 0:
-            # TODO: use regex 
+                logging.info('Found ref to paste %s', td.a['href'])
                 pastes.append(td.a['href'])
         except:
             pass
@@ -56,6 +61,7 @@ while True:
         havepaste = True
         try:
             open('data/'+paste)
+            logging.info('Found paste %s in data', paste)
         except:
             havepaste = False
 
@@ -63,6 +69,7 @@ while True:
         if not havepaste:
             time.sleep(2)
             pasteurl = 'http://pastebin.com/raw.php?i='+paste
+            logging.info('Getting paste %s', paste)
             pasteresp = geturl(pasteurl)
             try:
             # TODO: replace with sqlite3
@@ -70,5 +77,5 @@ while True:
                 pastefile.write(pasteresp.read())
                 pastefile.close()
             except:
-                sys.stderr.write('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
+                logging.error('ERMAGERD couldn\'t write to file: data/'+paste+'\n')
     time.sleep(60)
