@@ -44,7 +44,7 @@ while True:
 
     # Be nice if we're going too fast
     if soup.get_text().find('Please slow down'):
-        sleep(10)
+        time.sleep(10)
         break
 
     tabledata = soup.find_all('td')
@@ -82,7 +82,7 @@ while True:
             pasteresp = geturl(pasteurl)
             paste = pasteresp.read()
             if paste.find('Please slow down'):
-                sleep(10)
+                time.sleep(10)
             try:
             # TODO: replace with sqlite3
                 pastefile=open('data/'+pasteID,'w')
