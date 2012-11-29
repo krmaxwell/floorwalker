@@ -26,16 +26,19 @@ def geturl(myurl):
             sys.stderr.write('Opened '+testurl+' with response code '+response.getcode()+'\n')
     return response
     
-# TODO: instantiated thru cron so check for a lock first
+# TODO: check for a lock first
 
-# assuming nothing else is running, get http://pastebin.com/archive
 testurl = "http://pastebin.com/archive"
+
+# Just keep running until somebody tells us to stop
 while True:
+    # TODO: handle KeyboardError and kill commands
     response = geturl(testurl)
 
     # Generate list of pastes
     soup = BeautifulSoup(response)
     tabledata = soup.find_all('td')
+    # TODO: pastes should be persistent across runs so we don't have to grab it every time
     pastes = []
     for td in tabledata:
         try:    
