@@ -18,7 +18,7 @@ def geturl(myurl):
     req = urllib2.Request(myurl)
     try:
         response = urllib2.urlopen(req)
-    except URLError, e:
+    except urllib2.URLError, e:
         if hasattr(e,'reason'):
             logging.warning('urlopen() returned error '+e.reason+'\n')
         elif hasattr(e,'code'):
