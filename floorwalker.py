@@ -26,7 +26,6 @@ def geturl(myurl):
             logging.warning('Server couldn\'t fulfill request: %s\n',e.code)
         else:
             logging.warning('Opened %s with response code %s',testurl,response.getcode())
-        return False
     
 # TODO: check for a lock first
 
@@ -44,9 +43,9 @@ while True:
     soup = BeautifulSoup(response)
 
     # Be nice if we're going too fast
-    if soup.get_text().find('Please slow down'):
-        time.sleep(10)
-        break
+   # if soup.get_text().find('Please slow down'):
+   ##     time.sleep(10)
+   #     break
 
     tabledata = soup.find_all('td')
     # TODO: pastes should be persistent across runs so we don't have to grab it every time
@@ -64,6 +63,7 @@ while True:
     for pasteID in pastes:
         # drop the leading "/"
         pastematch = pastere.match(pasteID[1::])
+	paste = []
         if pastematch:
             havepaste = True
             try:
@@ -81,9 +81,10 @@ while True:
             pasteurl = 'http://pastebin.com/raw.php?i='+pasteID
             logging.info('Getting paste %s', pasteID)
             pasteresp = geturl(pasteurl)
-            paste = pasteresp.read()
-            if paste.find('Please slow down'):
-                time.sleep(10)
+            if hasattr(pasteresp, '__read__'):
+                paste = pasteresp.read()
+                if paste.find('Please slow down'):
+                    time.sleep(10)
             try:
             # TODO: replace with sqlite3
                 pastefile=open('data/'+pasteID,'w')
