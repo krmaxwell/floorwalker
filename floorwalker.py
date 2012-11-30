@@ -18,14 +18,15 @@ def geturl(myurl):
     req = urllib2.Request(myurl)
     try:
         response = urllib2.urlopen(req)
+        return response
     except urllib2.URLError, e:
         if hasattr(e,'reason'):
-            logging.warning('urlopen() returned error '+e.reason+'\n')
+            logging.warning('urlopen() returned error %s\n',e.reason)
         elif hasattr(e,'code'):
-            logging.warning('Server couldn\'t fulfill request: '+e.code+'\n')
+            logging.warning('Server couldn\'t fulfill request: %s\n',e.code)
         else:
-            logging.warning('Opened '+testurl+' with response code '+response.getcode()+'\n')
-    return response
+            logging.warning('Opened %s with response code %s',testurl,response.getcode())
+        return False
     
 # TODO: check for a lock first
 
@@ -43,11 +44,9 @@ while True:
     soup = BeautifulSoup(response)
 
     # Be nice if we're going too fast
-'''
     if soup.get_text().find('Please slow down'):
         time.sleep(10)
         break
-'''
 
     tabledata = soup.find_all('td')
     # TODO: pastes should be persistent across runs so we don't have to grab it every time
