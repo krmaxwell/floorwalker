@@ -17,7 +17,7 @@ def geturl(myurl):
     # TODO: use proper loggging, not just stderr
     try:
         response = urllib2.urlopen(req)
-    except URLError, e:
+    except urllib2.URLError, e:
         if hasattr(e,'reason'):
             sys.stderr.write('urlopen() returned error '+e.reason+'\n')
         elif hasattr(e,'code'):
