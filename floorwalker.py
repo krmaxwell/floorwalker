@@ -43,9 +43,11 @@ while True:
     soup = BeautifulSoup(response)
 
     # Be nice if we're going too fast
+'''
     if soup.get_text().find('Please slow down'):
         time.sleep(10)
         break
+'''
 
     tabledata = soup.find_all('td')
     # TODO: pastes should be persistent across runs so we don't have to grab it every time
