@@ -11,6 +11,7 @@ import urllib2
 import time
 import re
 import logging
+import pymongo
 
 # Planning through commenting!
 
@@ -25,27 +26,28 @@ def geturl(myurl):
         elif hasattr(e,'code'):
             logging.warning('Server couldn\'t fulfill request: %s\n',e.code)
         else:
-            logging.warning('Opened %s with response code %s',testurl,response.getcode())
+            logging.warning('Opened %s with response code %s',myurl,response.getcode())
     
 # TODO: check for a lock first
 
 logging.basicConfig(filename='floorwalker.log',format='%(asctime)s %(message)s',datefmt='%Y-%m-%d %H%M.%S',level=logging.DEBUG)
-testurl = "http://pastebin.com/archive"
+archiveurl = "http://pastebin.com/archive"
 pastere = re.compile("\w")
+
+# connect to mongodb
 
 # Just keep running until somebody tells us to stop
 while True:
     # TODO: handle KeyboardError and kill commands
-    logging.info('Getting URL %s', testurl)
-    response = geturl(testurl)
+    logging.info('Getting URL %s', archiveurl)
+    response = geturl(archiveurl)
 
     # Generate list of pastes
     soup = BeautifulSoup(response)
 
     # Be nice if we're going too fast
-   # if soup.get_text().find('Please slow down'):
-   ##     time.sleep(10)
-   #     break
+    if soup.get_text().find('Please slow down'):
+        time.sleep(10)
 
     tabledata = soup.find_all('td')
     # TODO: pastes should be persistent across runs so we don't have to grab it every time
@@ -53,27 +55,20 @@ while True:
     for td in tabledata:
         try:    
             if td.a['href'].count("/archive/") == 0:
-                logging.info('Found ref to paste %s', td.a['href'])
-                pastes.append(td.a['href'])
+                # drop the leading "/"
+                pasteID = td.a['href'][1::]
+                logging.info('Found ref to paste %s', pasteID)
+                pastes.append(pasteID)
         except:
             pass
 
     # Iterate through each listed paste
     # if we don't already have this one, store it
     for pasteID in pastes:
-        # drop the leading "/"
-        pastematch = pastere.match(pasteID[1::])
-	paste = []
-        if pastematch:
-            havepaste = True
-            try:
-                open('data/'+pasteID)
-                logging.info('Found paste %s in data', pastematch.group())
-            except:
-                havepaste = False
-        else:
-            havepaste = True
-            logging.info('Paste %s doesn\'t match the pattern', pasteID)
+        pastematch = pastere.match(pasteID)
+        paste = []
+        havepaste = # result of checking for key in mongodb
+
 
         # nested try blocks feel bad, man
         if not havepaste:
