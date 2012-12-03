@@ -11,6 +11,7 @@ import urllib2
 import time
 import re
 import logging
+import pymongo
 
 # Planning through commenting!
 
@@ -32,6 +33,7 @@ def geturl(myurl):
 logging.basicConfig(filename='floorwalker.log',format='%(asctime)s %(message)s',datefmt='%Y-%m-%d %H%M.%S',level=logging.DEBUG)
 testurl = "http://pastebin.com/archive"
 pastere = re.compile("\w")
+# TODO: open connection to MongoDB
 
 # Just keep running until somebody tells us to stop
 while True:
@@ -48,9 +50,10 @@ while True:
    #     break
 
     tabledata = soup.find_all('td')
-    # TODO: pastes should be persistent across runs so we don't have to grab it every time
+    # TODO: list of pastes should be persistent across runs so we don't have to grab it every time
     pastes = []
     for td in tabledata:
+	# TODO: replace with checking each listed paste against the local list
         try:    
             if td.a['href'].count("/archive/") == 0:
                 logging.info('Found ref to paste %s', td.a['href'])
@@ -64,6 +67,7 @@ while True:
         # drop the leading "/"
         pastematch = pastere.match(pasteID[1::])
 	paste = []
+	# TODO: move checking to prior loop
         if pastematch:
             havepaste = True
             try:
@@ -86,7 +90,7 @@ while True:
                 if paste.find('Please slow down'):
                     time.sleep(10)
             try:
-            # TODO: replace with sqlite3
+            # TODO: store in database
                 pastefile=open('data/'+pasteID,'w')
                 pastefile.write(paste)
                 pastefile.close()
