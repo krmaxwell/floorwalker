@@ -16,8 +16,6 @@ from dateutil.tz import *
 from datetime import *
 from time import sleep
 
-# Planning through commenting!
-
 def getpaste(pasteID):
     pastepage = geturl('http://pastebin.com/'+pasteID)
     # now parse this and return a dict
@@ -54,6 +52,7 @@ if __name__=="__main__":
     pastere = re.compile("\w")
 
     # connect to mongodb
+    # TODO: error handling
     connection = pymongo.MongoClient()
     db = connection.floorwalker
     pastes = db.pastes
