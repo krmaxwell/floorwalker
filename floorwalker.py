@@ -84,9 +84,9 @@ if __name__=="__main__":
                     pastes.insert(paste)
                 else:
                     logging.info('Could not retrieve paste %s', nextpasteID)
+                sleep(1)
             else:
                 logging.info('Already have paste %s', nextpasteID)
 
-        sleep(1)
     
     sleep(60)
