@@ -36,3 +36,6 @@ nosetests.xml
 
 # application logs
 *.log
+
+# old data
+data
