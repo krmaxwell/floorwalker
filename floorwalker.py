@@ -73,7 +73,9 @@ if __name__="__main__":
             nextpasteID = td.a['href'][1::]
             logging.info('Found ref to paste %s', nextpasteID)
             if not pastes.find_one({'id': nextpasteID}):
+                logging.info('Retrieving paste %s', nextpasteID)
                 paste = getpaste(nextpasteID)
+                logging.info('Inserting paste %s', nextpasteID)
                 pastes.insert(paste)
         time.sleep(1)
     
