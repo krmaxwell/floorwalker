@@ -27,7 +27,7 @@ def getpaste(pasteID):
     line = mysoup.find_all('div', 'paste_box_line2')[0].text
     mydate = parse(line.split(' ')[4] + line.split(' ')[5] +line.split(' ')[6])
     pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
-    fullpaste = {'title': title, 'author': author, 'date': mydate, 'paste': pastetext}
+    fullpaste = {'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
     return fullpaste
 
 def geturl(myurl):
