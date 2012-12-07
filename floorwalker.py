@@ -21,14 +21,16 @@ from time import sleep
 def getpaste(pasteID):
     pastepage = geturl('http://pastebin.com/'+pasteID)
     # now parse this and return a dict
-    mysoup = BeautifulSoup(pastepage)
-    title = mysoup.title.text
-    author = mysoup.find_all('div', 'paste_box_line2')[0].a.text
-    line = mysoup.find_all('div', 'paste_box_line2')[0].text
-    tempdate = line.split('on')[1].split(' ')
-    mydate = parse(tempdate[1] + tempdate[2] + tempdate[3])
-    pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
-    fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
+    fullpaste={}
+    if pastepage:
+        mysoup = BeautifulSoup(pastepage)
+        title = mysoup.title.text
+        author = mysoup.find_all('div', 'paste_box_line2')[0].a.text
+        line = mysoup.find_all('div', 'paste_box_line2')[0].text
+        tempdate = line.split('on')[1].split(' ')
+        mydate = parse(tempdate[1] + tempdate[2] + tempdate[3])
+        pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
+        fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
     return fullpaste
 
 def geturl(myurl):
@@ -76,8 +78,11 @@ if __name__=="__main__":
             if not pastes.find_one({'id': nextpasteID}):
                 logging.info('Retrieving paste %s', nextpasteID)
                 paste = getpaste(nextpasteID)
-                logging.info('Inserting paste %s', nextpasteID)
-                pastes.insert(paste)
+                if paste:
+                    logging.info('Inserting paste %s', nextpasteID)
+                    pastes.insert(paste)
+                else:
+                    logging.info('Could not retrieve paste %s', nextpasteID)
             else:
                 logging.info('Already have paste %s', nextpasteID)
 
