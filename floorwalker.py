@@ -68,7 +68,7 @@ if __name__=="__main__":
     tabledata = soup.find_all('td')
     for td in tabledata:
         # TODO: rewrite without the try/except using hasattr()
-        if hasattr(td.a['href'], count) and td.a['href'].count("/archive/") == 0:
+        if td.a and not td.a['href'] == "/archive/text":
             # drop the leading "/"
             nextpasteID = td.a['href'][1::]
             logging.info('Found ref to paste %s', nextpasteID)
