@@ -39,3 +39,6 @@ nosetests.xml
 
 # old data
 data
+
+# archives
+*.gz
