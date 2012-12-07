@@ -50,7 +50,7 @@ if __name__=="__main__":
     pastere = re.compile("\w")
 
     # connect to mongodb
-    connection = pymongo.MongoClient
+    connection = pymongo.MongoClient()
     db = connection.floorwalker
     pastes = db.pastes
 
