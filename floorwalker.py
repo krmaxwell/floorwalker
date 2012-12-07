@@ -25,7 +25,8 @@ def getpaste(pasteID):
     title = mysoup.title.text
     author = mysoup.find_all('div', 'paste_box_line2')[0].a.text
     line = mysoup.find_all('div', 'paste_box_line2')[0].text
-    mydate = parse(line.split(' ')[4] + line.split(' ')[5] +line.split(' ')[6])
+    tempdate = line.split('on')[1].split(' ')
+    mydate = parse(tempdate[1] + tempdate[2] + tempdate[3])
     pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
     fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
     return fullpaste
@@ -63,12 +64,12 @@ if __name__=="__main__":
 
     # Be nice if we're going too fast
     if soup.get_text().find('Please slow down'):
-        sleep(10)
+        sleep(4)
     
     tabledata = soup.find_all('td')
     for td in tabledata:
         # TODO: rewrite without the try/except using hasattr()
-        if td.a and not td.a['href'] == "/archive/text":
+        if td.a and not "/archive/" in td.a['href']:
             # drop the leading "/"
             nextpasteID = td.a['href'][1::]
             logging.info('Found ref to paste %s', nextpasteID)
@@ -77,6 +78,9 @@ if __name__=="__main__":
                 paste = getpaste(nextpasteID)
                 logging.info('Inserting paste %s', nextpasteID)
                 pastes.insert(paste)
+            else:
+                logging.info('Already have paste %s', nextpasteID)
+
         sleep(1)
     
     sleep(60)
