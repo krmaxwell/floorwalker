@@ -27,7 +27,7 @@ def getpaste(pasteID):
     line = mysoup.find_all('div', 'paste_box_line2')[0].text
     mydate = parse(line.split(' ')[4] + line.split(' ')[5] +line.split(' ')[6])
     pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
-    fullpaste = {'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
+    fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
     return fullpaste
 
 def geturl(myurl):
@@ -72,32 +72,9 @@ if __name__="__main__":
             # drop the leading "/"
             nextpasteID = td.a['href'][1::]
             logging.info('Found ref to paste %s', nextpasteID)
-            if not havepaste(nextpasteID):
+            if not pastes.find_one({'id': nextpasteID}):
                 paste = getpaste(nextpasteID)
+                pastes.insert(paste)
+        time.sleep(1)
     
-        # Iterate through each listed paste
-        # if we don't already have this one, store it
-        for pasteID in pastes:
-            pastematch = pastere.match(pasteID)
-            paste = []
-            havepaste = # result of checking for key in mongodb
-    
-    
-            # nested try blocks feel bad, man
-            if not havepaste:
-                time.sleep(2)
-                pasteurl = 'http://pastebin.com/raw.php?i='+pasteID
-                logging.info('Getting paste %s', pasteID)
-                pasteresp = geturl(pasteurl)
-                if hasattr(pasteresp, '__read__'):
-                    paste = pasteresp.read()
-                    if paste.find('Please slow down'):
-                        time.sleep(10)
-                try:
-                # TODO: replace with sqlite3
-                    pastefile=open('data/'+pasteID,'w')
-                    pastefile.write(paste)
-                    pastefile.close()
-                except:
-                    logging.error('ERMAGERD couldn\'t write to file: data/'+pasteID+'\n')
-        time.sleep(60)
+    time.sleep(60)
