@@ -25,12 +25,13 @@ def getpaste(pasteID):
     if pastepage:
         mysoup = BeautifulSoup(pastepage)
         title = mysoup.title.text
-        author = mysoup.find_all('div', 'paste_box_line2')[0].a.text
-        line = mysoup.find_all('div', 'paste_box_line2')[0].text
-        tempdate = line.split('on')[1].split(' ')
-        mydate = parse(tempdate[1] + tempdate[2] + tempdate[3])
-        pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
-        fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
+        if "Private Paste ID" not in title:
+            author = mysoup.find_all('div', 'paste_box_line2')[0].a.text
+            line = mysoup.find_all('div', 'paste_box_line2')[0].text
+            tempdate = line.split('on')[1].split(' ')
+            mydate = parse(tempdate[1] + tempdate[2] + tempdate[3])
+            pastetext = BeautifulSoup(geturl('http://pastebin.com/raw.php?i='+pasteID)).text
+            fullpaste = {'id': pasteID, 'title': title, 'author': author, 'date': mydate.strftime("%Y-%m-%d") , 'paste': pastetext}
     return fullpaste
 
 def geturl(myurl):
