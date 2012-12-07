@@ -8,13 +8,13 @@ from bs4 import BeautifulSoup
 
 import sys
 import urllib2
-import time
 import re
 import logging
 import pymongo
 from dateutil.parser import *
 from dateutil.tz import *
 from datetime import *
+from time import sleep
 
 # Planning through commenting!
 
@@ -63,7 +63,7 @@ if __name__=="__main__":
 
     # Be nice if we're going too fast
     if soup.get_text().find('Please slow down'):
-        time.sleep(10)
+        sleep(10)
     
     tabledata = soup.find_all('td')
     for td in tabledata:
@@ -77,6 +77,6 @@ if __name__=="__main__":
                 paste = getpaste(nextpasteID)
                 logging.info('Inserting paste %s', nextpasteID)
                 pastes.insert(paste)
-        time.sleep(1)
+        sleep(1)
     
-    time.sleep(60)
+    sleep(60)
