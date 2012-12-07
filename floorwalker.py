@@ -44,7 +44,7 @@ def geturl(myurl):
             logging.warning('Opened %s with response code %s',myurl,response.getcode())
     
 # TODO: check for a lock first
-if __name__="__main__":
+if __name__=="__main__":
     logging.basicConfig(filename='floorwalker.log',format='%(asctime)s %(message)s',datefmt='%Y-%m-%d %H%M.%S',level=logging.DEBUG)
     archiveurl = "http://pastebin.com/archive"
     pastere = re.compile("\w")
